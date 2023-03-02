@@ -9,11 +9,13 @@ interface IFramewareFeatureManager
      *
      * @return iterable<IFramewareFeature>
      */
-    public function search(array $filters = []): iterable;
+    public function search(array $filters): iterable;
 
     public function store(int|IFrameware $frameware, string $name, bool $userActivityLog = false): IFramewareFeature;
 
-    public function softDelete(int|IFramewareFeature $feature, bool $userActivityLog = false): IFramewareFeature;
+    public function trash(int|IFramewareFeature $feature, bool $userActivityLog = false): IFramewareFeature;
+
+    public function restore(int|IFramewareFeature $feature, bool $userActivityLog = false): IFramewareFeature;
 
     public function destroy(int|IFramewareFeature $feature, bool $userActivityLog = false): void;
 

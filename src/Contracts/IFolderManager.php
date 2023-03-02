@@ -2,40 +2,39 @@
 
 namespace YektaSmart\IotServer\Contracts;
 
-use dnj\Filesystem\Contracts\IDirectory;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 interface IFolderManager
 {
     /**
-     * @param array{owner?:int,title?:string,parent?:IDirectory|int,containsDevice?:IDevice|int,containsFolder?:IFolder|int,userHasAccess?:int} $filters
+     * @param array{owner?:int,title?:string,parent?:IFolder|int,containsDevice?:IDevice|int,containsFolder?:IFolder|int,userHasAccess?:int} $filters
      *
      * @return iterable<IFolder>
      */
-    public function search(array $filters = []): iterable;
+    public function search(array $filters): iterable;
 
     /**
      * Only owner can create a sub-folder inside the folder.
      *
-     * @param int|null $owner if owner set null, current authenticated user will use
-     * @param int[]    $users additional users who access to this folder and it's devices. (Also access to it's sub-folders)
+     * @param int[] $users additional users who access to this folder and it's devices. (Also access to it's sub-folders)
      */
     public function store(
         string $title,
-        int|IDirectory|null $parent,
-        ?int $owner = null,
+        int|IFolder|null $parent,
+        int|Authenticatable $owner,
         array $users = [],
-        bool $userActivity = false
+        bool $userActivityLog = false
     ): IFolder;
 
     /**
      * Only owner can invoke this method.
      *
-     * @param array{title?:string,parent?:IDirectory|int,owner?:int,users?:int[]} $changes
+     * @param array{title?:string,parent?:IFolder|int,owner?:int|Authenticatable,users?:int[]} $changes
      */
     public function update(
         int|IFolder $folder,
         array $changes,
-        bool $userActivity = false
+        bool $userActivityLog = false
     ): IFolder;
 
     /**

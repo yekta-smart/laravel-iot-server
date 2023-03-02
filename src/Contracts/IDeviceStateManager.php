@@ -9,12 +9,12 @@ interface IDeviceStateManager
      *
      * @return iterable<IDeviceState>
      */
-    public function search(int|IDevice $device, array $filters = []): iterable;
+    public function search(int|IDevice $device, array $filters): iterable;
 
     public function store(
         int|IDevice $device,
         array $data,
-        \DateTimeInterface $createdAt = null,
+        ?\DateTimeInterface $createdAt = null,
         bool $userActivityLog = false
     ): IDeviceState;
 

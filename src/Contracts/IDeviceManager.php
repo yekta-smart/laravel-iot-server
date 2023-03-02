@@ -9,7 +9,7 @@ interface IDeviceManager
      *
      * @return iterable<IDevice>
      */
-    public function search(array $filters = []): iterable;
+    public function search(array $filters): iterable;
 
     /**
      * @param int[]|null                                                                                       $users         additional users who access to this device
@@ -33,15 +33,15 @@ interface IDeviceManager
      * @param array{title?:string,product?:int|IProduct,hardware?:int|IHardware,frameware?:int|IFrameware,historyLimits?:array{config?:array{count:int|null,age:int|null},state?:array{count:int|null,age:int|null}}|null,users?:int[],features?:array{enabledIds?:int[],disabledIds?:int[]}|null} $changes
      */
     public function update(
-        int|IProduct $product,
+        int|IDevice $device,
         array $changes,
         bool $userActivityLog = false,
-    ): void;
+    ): IDevice;
 
     /**
      * Only owner can delete their's device.
      */
-    public function destroy(int|IProduct $product, bool $userActivityLog = false): void;
+    public function destroy(int|IDevice $device, bool $userActivityLog = false): void;
 
     /**
      * @return iterable<IFrameware>

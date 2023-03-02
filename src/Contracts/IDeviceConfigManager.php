@@ -2,6 +2,8 @@
 
 namespace YektaSmart\IotServer\Contracts;
 
+use Illuminate\Contracts\Auth\Authenticatable;
+
 interface IDeviceConfigManager
 {
     /**
@@ -9,14 +11,14 @@ interface IDeviceConfigManager
      *
      * @return iterable<IDeviceConfig>
      */
-    public function search(int|IDevice $device, array $filters = []): iterable;
+    public function search(int|IDevice $device, array $filters): iterable;
 
     public function store(
         int|IDevice $device,
         array $data,
-        \DateTimeInterface $createdAt = null,
-        int $configuratorId = null,
-        array $configuratorData = null,
+        int|Authenticatable|null $configuratorId,
+        ?array $configuratorData = null,
+        ?\DateTimeInterface $createdAt = null,
         bool $userActivityLog = false,
     ): IDeviceConfig;
 

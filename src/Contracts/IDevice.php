@@ -6,7 +6,7 @@ use dnj\AAA\Contracts\IOwnerableModel;
 
 interface IDevice extends IOwnerableModel
 {
-    public function getId(): string;
+    public function getId(): int;
 
     public function getTitle(): string;
 
