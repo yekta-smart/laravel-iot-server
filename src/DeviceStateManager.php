@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use YektaSmart\IotServer\Contracts\IDevice;
 use YektaSmart\IotServer\Contracts\IDeviceState;
 use YektaSmart\IotServer\Contracts\IDeviceStateManager;
+use YektaSmart\IotServer\Models\Device;
 use YektaSmart\IotServer\Models\DeviceState;
 
 class DeviceStateManager implements IDeviceStateManager
@@ -24,6 +25,14 @@ class DeviceStateManager implements IDeviceStateManager
         return DeviceState::query()->forDevice($device)->filter($filters)->get();
     }
 
+    public function getLatest(int|IDevice $device): ?DeviceState
+    {
+        return DeviceState::query()
+            ->forDevice($device)
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
     public function store(
         int|IDevice $device,
         array $data,
@@ -35,7 +44,7 @@ class DeviceStateManager implements IDeviceStateManager
              * @var DeviceState
              */
             $state = DeviceState::query()->create([
-                'device_id' => $device,
+                'device_id' => Device::ensureId($device),
                 'created_at' => $createdAt ?? now(),
                 'data' => $data,
             ]);
