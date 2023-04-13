@@ -1,5 +1,6 @@
 {
 	"name": "yekta-smart/laravel-iot-server",
+	"license": "MIT",
 	"require": {
 		"php": "^8.1",
 		"dnj/filesystem": "^1.0.1",
