@@ -23,7 +23,7 @@ interface IProduct extends IOwnerableModel
     /**
      * @param int[]
      */
-    public function getFramewareIds(): array;
+    public function getFirmwareIds(): array;
 
     /**
      * @return array{count:int|null,age:int|null}|null
@@ -33,7 +33,7 @@ interface IProduct extends IOwnerableModel
     /**
      * @return int[]|null
      */
-    public function getDefaultFeatureIds(int|IFrameware $frameware): ?array;
+    public function getDefaultFeatureIds(int|IFirmware $firmware): ?array;
 
     /**
      * @see https://github.com/dnj/php-error-tracker-contracts

@@ -8,6 +8,8 @@ interface IDevice extends IOwnerableModel
 {
     public function getId(): int;
 
+    public function getSerial(): string;
+
     public function getTitle(): string;
 
     /**
@@ -26,7 +28,7 @@ interface IDevice extends IOwnerableModel
 
     public function getHardwareId(): int;
 
-    public function getFramewareId(): int;
+    public function getFirmwareId(): int;
 
     /**
      * @return array{enabledIds:int[],disabledIds:int[]}|null

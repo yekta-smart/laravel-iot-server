@@ -6,8 +6,12 @@ use Illuminate\Contracts\Auth\Authenticatable;
 
 interface IProductManager
 {
+    public function find(int $id): ?IProduct;
+
+    public function findOrFail(int $id): IProduct;
+
     /**
-     * @param array{title?:string,hardware?:int[],frameware?:int[],owner?:int[]|null} $filters
+     * @param array{title?:string,hardware?:int[],firmware?:int[],owner?:int[]|null,userHasAccess?:int} $filters
      *
      * @return iterable<IProduct>
      */
@@ -15,22 +19,22 @@ interface IProductManager
 
     /**
      * @param class-string<IDeviceHandler>
-     * @param array<int|IHardware>                                                 $hardwares
-     * @param array<array{id:IFrameware|int,defaultFeatures:int[]}|IFrameware|int> $framewares
-     * @param array{count:int|null,age:int|null}|null                              $stateHistoryLimits
+     * @param array<int|IHardware>                                               $hardwares
+     * @param array<array{id:IFirmware|int,defaultFeatures:int[]}|IFirmware|int> $firmwares
+     * @param array{count:int|null,age:int|null}|null                            $stateHistoryLimits
      */
     public function store(
         string $title,
         string $deviceHandler,
         int|Authenticatable $owner,
         array $hardwares = [],
-        array $framewares = [],
+        array $firmwares = [],
         ?array $stateHistoryLimits = null,
         bool $userActivityLog = false,
     ): IProduct;
 
     /**
-     * @param array{title?:string,deviceHandler?:class-string<IDeviceHandler>,hardwares?:array<int|IHardware>,framewares:array<array{id:IFrameware|int,defaultFeatures:int[]}|IFrameware|int>,stateHistoryLimits:array{count:int|null,age:int|null}|null,owner?:int|Authenticatable} $changes
+     * @param array{title?:string,deviceHandler?:class-string<IDeviceHandler>,hardwares?:array<int|IHardware>,firmwares:array<array{id:IFirmware|int,defaultFeatures:int[]}|IFirmware|int>,stateHistoryLimits:array{count:int|null,age:int|null}|null,owner?:int|Authenticatable} $changes
      */
     public function update(int|IProduct $product, array $changes, bool $userActivityLog = false): IProduct;
 

@@ -13,6 +13,8 @@ interface IDeviceConfigManager
      */
     public function search(int|IDevice $device, array $filters): iterable;
 
+    public function getLatest(int|IDevice $device): ?IDeviceConfig;
+
     public function store(
         int|IDevice $device,
         array $data,

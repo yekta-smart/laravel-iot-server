@@ -11,6 +11,8 @@ interface IDeviceStateManager
      */
     public function search(int|IDevice $device, array $filters): iterable;
 
+    public function getLatest(int|IDevice $device): ?IDeviceState;
+
     public function store(
         int|IDevice $device,
         array $data,

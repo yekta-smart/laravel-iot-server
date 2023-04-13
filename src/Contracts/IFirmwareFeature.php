@@ -2,11 +2,11 @@
 
 namespace YektaSmart\IotServer\Contracts;
 
-interface IFramewareFeature
+interface IFirmwareFeature
 {
     public function getId(): int;
 
-    public function getFramewareId(): int;
+    public function getFirmwareId(): int;
 
     public function getName(): string;
 

@@ -2,10 +2,20 @@
 
 namespace YektaSmart\IotServer\Contracts;
 
+use Illuminate\Contracts\Auth\Authenticatable;
+
 interface IDeviceManager
 {
+    public function find(int $id): ?IDevice;
+
+    public function findOrFail(int $id): IDevice;
+
+    public function findBySerial(string $serial): ?IDevice;
+
+    public function findBySerialOrFail(string $serial): IDevice;
+
     /**
-     * @param array{title?:string,product?:int|IProduct,hardware?:int|IHardware,frameware?:int|IFrameware,owner?:int,userHasAccess?:int} $filters
+     * @param array{title?:string,product?:int|IProduct,hardware?:int|IHardware,firmware?:int|IFirmware,owner?:int,userHasAccess?:int} $filters
      *
      * @return iterable<IDevice>
      */
@@ -20,17 +30,19 @@ interface IDeviceManager
         string $title,
         int|IProduct $product,
         int|IHardware $hardware,
-        int|IFrameware $frameware,
+        int|IFirmware $firmware,
+        int|Authenticatable $owner,
         array $users = [],
         ?array $historyLimits = null,
         ?array $features = null,
+        ?string $serial = null,
         bool $userActivityLog = false,
     ): IDevice;
 
     /**
      * Only owner can update their's device.
      *
-     * @param array{title?:string,product?:int|IProduct,hardware?:int|IHardware,frameware?:int|IFrameware,historyLimits?:array{config?:array{count:int|null,age:int|null},state?:array{count:int|null,age:int|null}}|null,users?:int[],features?:array{enabledIds?:int[],disabledIds?:int[]}|null} $changes
+     * @param array{serial?:string,title?:string,product?:int|IProduct,hardware?:int|IHardware,firmware?:int|IFirmware,owner?:int|Authenticatable,historyLimits?:array{config?:array{count:int|null,age:int|null},state?:array{count:int|null,age:int|null}}|null,users?:int[],features?:array{enabledIds?:int[],disabledIds?:int[]}|null,users?:array<int|Authenticatable>} $changes
      */
     public function update(
         int|IDevice $device,
@@ -44,7 +56,7 @@ interface IDeviceManager
     public function destroy(int|IDevice $device, bool $userActivityLog = false): void;
 
     /**
-     * @return iterable<IFrameware>
+     * @return iterable<IFirmware>
      */
-    public function availableFramewareUpdate(int|IDevice $device): iterable;
+    public function availableFirmwareUpdate(int|IDevice $device): iterable;
 }
