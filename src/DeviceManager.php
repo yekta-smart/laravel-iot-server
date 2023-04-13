@@ -2,21 +2,48 @@
 
 namespace YektaSmart\IotServer;
 
+use dnj\ErrorTracker\Contracts\IDeviceManager as ContractsIDeviceManager;
 use dnj\UserLogger\Contracts\ILogger;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use YektaSmart\IotServer\Contracts\IDevice;
 use YektaSmart\IotServer\Contracts\IDeviceManager;
-use YektaSmart\IotServer\Contracts\IFrameware;
+use YektaSmart\IotServer\Contracts\IFirmware;
 use YektaSmart\IotServer\Contracts\IHardware;
 use YektaSmart\IotServer\Contracts\IProduct;
 use YektaSmart\IotServer\Models\Device;
+use YektaSmart\IotServer\Models\Firmware;
+use YektaSmart\IotServer\Models\Hardware;
+use YektaSmart\IotServer\Models\Product;
 
 class DeviceManager implements IDeviceManager
 {
-    public function __construct(protected ILogger $userLogger)
+    public function __construct(
+        protected ILogger $userLogger,
+        protected ContractsIDeviceManager $errorTrackerDeviceManager,
+    ) {
+    }
+
+    public function find(int $id): ?Device
     {
+        return Device::query()->find($id);
+    }
+
+    public function findOrFail(int $id): Device
+    {
+        return Device::query()->findOrFail($id);
+    }
+
+    public function findBySerial(string $serial): ?Device
+    {
+        return Device::query()->where('serial', $serial)->first();
+    }
+
+    public function findBySerialOrFail(string $serial): Device
+    {
+        return Device::query()->where('serial', $serial)->firstOrFail();
     }
 
     /**
@@ -36,26 +63,33 @@ class DeviceManager implements IDeviceManager
         string $title,
         int|IProduct $product,
         int|IHardware $hardware,
-        int|IFrameware $frameware,
+        int|IFirmware $firmware,
+        int|Authenticatable $owner,
         array $users = [],
         ?array $historyLimits = null,
         ?array $features = null,
+        ?string $serial = null,
         bool $userActivityLog = false,
     ): Device {
-        return DB::transaction(function () use ($title, $product, $hardware, $frameware, $users, $historyLimits, $features, $userActivityLog) {
+        return DB::transaction(function () use ($serial, $title, $product, $hardware, $firmware, $owner, $users, $historyLimits, $features, $userActivityLog) {
             $users = array_map([UserUtil::class, 'ensureId'], $users);
+            $errorTrackerDevice = $this->errorTrackerDeviceManager->store($title, $owner, null, false);
 
             /**
              * @var Device
              */
-            $device = Device::query()->create([
+            $device = Device::query()->newModelInstance([
+                'serial' => $serial ?? str_replace('-', '', Str::uuid()),
                 'title' => $title,
-                'product_id' => $product,
-                'hardware' => $hardware,
-                'framware' => $frameware,
+                'product_id' => Product::ensureId($product),
+                'hardware_id' => Hardware::ensureId($hardware),
+                'firmware_id' => Firmware::ensureId($firmware),
                 'history_limits' => $historyLimits,
                 'features' => $features,
+                'owner_id' => UserUtil::ensureId($owner),
             ]);
+            $device->error_tracker_device_id = $errorTrackerDevice->getId();
+            $device->save();
             $device->users()->sync($users);
 
             if ($userActivityLog) {
@@ -82,8 +116,15 @@ class DeviceManager implements IDeviceManager
                 ->lockForUpdate()
                 ->findOrFail(Device::ensureId($device));
 
-            foreach (['product', 'hardware', 'frameware'] as $key) {
+            foreach (['product', 'hardware', 'firmware', 'owner'] as $key) {
                 if (isset($changes[$key])) {
+                    if (is_object($changes[$key])) {
+                        if (method_exists($changes[$key], 'getId')) {
+                            $changes[$key] = $changes[$key]->getId();
+                        } elseif (property_exists($changes[$key], 'id')) {
+                            $changes[$key] = $changes[$key]->id;
+                        }
+                    }
                     $changes[$key.'_id'] = $changes[$key];
                     unset($changes[$key]);
                 }
@@ -136,9 +177,9 @@ class DeviceManager implements IDeviceManager
     }
 
     /**
-     * @return Collection<Frameware>
+     * @return Collection<Firmware>
      */
-    public function availableFramewareUpdate(int|IDevice $device): Collection
+    public function availableFirmwareUpdate(int|IDevice $device): Collection
     {
         return collect();
     }
