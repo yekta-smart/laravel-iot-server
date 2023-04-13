@@ -10,14 +10,20 @@ return new class() extends Migration {
     {
         Schema::create('iot_server_folders', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class, 'owner_id');
+
+            $table->foreignId('owner_id')
+                ->constrained((new User())->getTable(), 'id');
+
             $table->foreignId('parent_id')
                 ->nullable()
                 ->references('id')
                 ->on('iot_server_folders')
                 ->cascadeOnDelete();
+
             $table->string('title');
+
             $table->timestamp('created_at');
+
             $table->timestamp('updated_at')->nullable();
         });
     }

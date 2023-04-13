@@ -10,12 +10,14 @@ return new class() extends Migration {
     public function up(): void
     {
         Schema::create('iot_server_folders_users', function (Blueprint $table) {
-            $table->foreignIdFor(Folder::class, 'folder_id')
-                ->references('id')
+            $table->foreignId('folder_id')
+                ->constrained((new Folder())->getTable(), 'id')
                 ->cascadeOnDelete();
-            $table->foreignIdFor(User::class, 'user_id')
-                ->references('id')
+
+            $table->foreignId('user_id')
+                ->constrained((new User())->getTable(), 'id')
                 ->cascadeOnDelete();
+
             $table->primary(['folder_id', 'user_id']);
         });
     }

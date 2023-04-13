@@ -5,7 +5,7 @@ use dnj\ErrorTracker\Laravel\Server\Models\Device;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use YektaSmart\IotServer\Models\Frameware;
+use YektaSmart\IotServer\Models\Firmware;
 use YektaSmart\IotServer\Models\Hardware;
 use YektaSmart\IotServer\Models\Product;
 
@@ -14,15 +14,38 @@ return new class() extends Migration {
     {
         Schema::create('iot_server_devices', function (Blueprint $table) {
             $table->id();
+
+            $table->string('serial', 32)
+                ->collation('latin1_general_ci')
+                ->unique();
+
             $table->string('title');
-            $table->foreignIdFor(User::class, 'owner_id');
-            $table->json('history_limits')->collation('latin1_general_ci')->nullable();
-            $table->foreignIdFor(Product::class, 'product_id');
-            $table->foreignIdFor(Frameware::class, 'frameware_id');
-            $table->foreignIdFor(Hardware::class, 'hardware_id');
-            $table->json('features')->collation('latin1_general_ci')->nullable();
-            $table->foreignIdFor(Device::class, 'error_tracker_device_id')->unique();
+
+            $table->foreignId('owner_id')
+                ->nullable()
+                ->constrained((new User())->getTable(), 'id');
+
+            $table->json('history_limits')
+                ->nullable();
+
+            $table->foreignId('product_id')
+                ->constrained((new Product())->getTable(), 'id');
+
+            $table->foreignId('firmware_id')
+                ->constrained((new Firmware())->getTable(), 'id');
+
+            $table->foreignId('hardware_id')
+                ->constrained((new Hardware())->getTable(), 'id');
+
+            $table->json('features')
+                ->nullable();
+
+            $table->foreignId('error_tracker_device_id')
+                ->unique()
+                ->constrained((new Device())->getTable(), 'id');
+
             $table->timestamp('created_at');
+
             $table->timestamp('updated_at')->nullable();
         });
     }

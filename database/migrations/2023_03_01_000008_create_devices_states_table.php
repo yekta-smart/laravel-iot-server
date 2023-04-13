@@ -10,8 +10,13 @@ return new class() extends Migration {
     {
         Schema::create('iot_server_devices_states', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Device::class, 'device_id');
+
+            $table->foreignId('device_id')
+                ->constrained((new Device())->getTable(), 'id')
+                ->cascadeOnDelete();
+
             $table->timestamp('created_at');
+
             $table->json('data');
         });
     }

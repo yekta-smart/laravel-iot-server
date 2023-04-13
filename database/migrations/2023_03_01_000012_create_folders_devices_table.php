@@ -10,12 +10,14 @@ return new class() extends Migration {
     public function up(): void
     {
         Schema::create('iot_server_folders_devices', function (Blueprint $table) {
-            $table->foreignIdFor(Folder::class, 'folder_id')
-                ->references('id')
+            $table->foreignId('folder_id')
+                ->constrained((new Folder())->getTable(), 'id')
                 ->cascadeOnDelete();
-            $table->foreignIdFor(Device::class, 'device_id')
-                ->references('id')
+
+            $table->foreignId('device_id')
+                ->constrained((new Device())->getTable(), 'id')
                 ->cascadeOnDelete();
+
             $table->primary(['folder_id', 'device_id']);
         });
     }

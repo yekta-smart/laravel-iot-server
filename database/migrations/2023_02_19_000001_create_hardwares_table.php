@@ -10,10 +10,22 @@ return new class() extends Migration {
     {
         Schema::create('iot_server_hardwares', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class, 'owner_id');
-            $table->string('name', 100)->collation('latin1_general_ci')->unique();
+
+            $table->string('serial', 32)
+                ->collation('latin1_general_ci')
+                ->unique();
+
+            $table->foreignId('owner_id')
+                ->constrained((new User())->getTable(), 'id');
+
+            $table->string('name', 100)
+                ->collation('latin1_general_ci')
+                ->unique();
+
             $table->unsignedInteger('version');
+
             $table->timestamp('created_at');
+
             $table->timestamp('updated_at')->nullable();
         });
     }

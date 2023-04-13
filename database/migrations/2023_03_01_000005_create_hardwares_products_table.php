@@ -10,8 +10,12 @@ return new class() extends Migration {
     public function up(): void
     {
         Schema::create('iot_server_hardwares_products', function (Blueprint $table) {
-            $table->foreignIdFor(Hardware::class, 'hardware_id');
-            $table->foreignIdFor(Product::class, 'product_id');
+            $table->foreignId('hardware_id')
+                ->constrained((new Hardware())->getTable(), 'id');
+
+            $table->foreignId('product_id')
+                ->constrained((new Product())->getTable(), 'id');
+
             $table->primary(['hardware_id', 'product_id']);
         });
     }
