@@ -18,7 +18,6 @@ use YektaSmart\IotServer\Casts\File;
 use YektaSmart\IotServer\Contracts\IFirmware;
 use YektaSmart\IotServer\Database\Factories\FirmwareFactory;
 use YektaSmart\IotServer\Models\Concerns\HasVersion;
-use YektaSmart\IotServer\UserUtil;
 
 /**
  * @property int                  $id
@@ -89,7 +88,7 @@ class Firmware extends Model implements IFirmware
             $query->whereRelation('hardwares', 'id', Hardware::ensureId($filters['compatibleWithHardware']));
         }
         if (isset($filters['owner'])) {
-            $query->where($this->getOwnerUserColumn(), UserUtil::ensureId($filters['owner']));
+            $query->where($this->getOwnerUserColumn(), User::ensureId($filters['owner']));
         }
         if (isset($filters['userHasAccess'])) {
             $this->scopeUserHasAccess($query, $filters['userHasAccess']);

@@ -2,6 +2,7 @@
 
 namespace YektaSmart\IotServer;
 
+use dnj\AAA\Models\User;
 use dnj\ErrorTracker\Contracts\IDeviceManager as ContractsIDeviceManager;
 use dnj\UserLogger\Contracts\ILogger;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -72,7 +73,7 @@ class DeviceManager implements IDeviceManager
         bool $userActivityLog = false,
     ): Device {
         return DB::transaction(function () use ($serial, $title, $product, $hardware, $firmware, $owner, $users, $historyLimits, $features, $userActivityLog) {
-            $users = array_map([UserUtil::class, 'ensureId'], $users);
+            $users = array_map([User::class, 'ensureId'], $users);
             $errorTrackerDevice = $this->errorTrackerDeviceManager->store($title, $owner, null, false);
 
             /**
@@ -86,7 +87,7 @@ class DeviceManager implements IDeviceManager
                 'firmware_id' => Firmware::ensureId($firmware),
                 'history_limits' => $historyLimits,
                 'features' => $features,
-                'owner_id' => UserUtil::ensureId($owner),
+                'owner_id' => User::ensureId($owner),
             ]);
             $device->error_tracker_device_id = $errorTrackerDevice->getId();
             $device->save();
@@ -136,7 +137,7 @@ class DeviceManager implements IDeviceManager
                 }
             }
             if (isset($changes['users'])) {
-                $users = array_map([UserUtil::class, 'ensureId'], $changes['users']);
+                $users = array_map([User::class, 'ensureId'], $changes['users']);
                 $device->users()->sync($users);
                 unset($changes['users']);
             }

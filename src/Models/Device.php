@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use YektaSmart\IotServer\Contracts\IDevice;
 use YektaSmart\IotServer\Contracts\IDeviceHandler;
 use YektaSmart\IotServer\Database\Factories\DeviceFactory;
-use YektaSmart\IotServer\UserUtil;
 
 /**
  * @property int                                                                                            $id
@@ -117,7 +116,7 @@ class Device extends Model implements IDevice
             $query->where('firmware_id', Firmware::ensureId($filters['firmware']));
         }
         if (isset($filters['owner'])) {
-            $query->where($this->getOwnerUserColumn(), UserUtil::ensureId($filters['owner']));
+            $query->where($this->getOwnerUserColumn(), User::ensureId($filters['owner']));
         }
         if (isset($filters['userHasAccess'])) {
             $this->scopeUserHasAccess($query, $filters['userHasAccess']);

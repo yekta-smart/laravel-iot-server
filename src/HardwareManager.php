@@ -2,6 +2,7 @@
 
 namespace YektaSmart\IotServer;
 
+use dnj\AAA\Models\User;
 use dnj\UserLogger\Contracts\ILogger;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
@@ -59,7 +60,7 @@ class HardwareManager implements IHardwareManager
         return DB::transaction(function () use ($name, $version, $owner, $firmwares, $products, $serial, $userActivityLog) {
             $firmwares = array_map([Firmware::class, 'ensureId'], $firmwares);
             $products = array_map([Product::class, 'ensureId'], $products);
-            $owner = UserUtil::ensureId($owner);
+            $owner = User::ensureId($owner);
 
             /**
              * @var Hardware
@@ -104,7 +105,7 @@ class HardwareManager implements IHardwareManager
                 unset($changes['firmwares']);
             }
             if (isset($changes['owner'])) {
-                $changes['owner_id'] = UserUtil::ensureId($changes['owner']);
+                $changes['owner_id'] = User::ensureId($changes['owner']);
                 unset($changes['owner']);
             }
             $hardware->fill($changes);

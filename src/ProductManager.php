@@ -2,6 +2,7 @@
 
 namespace YektaSmart\IotServer;
 
+use dnj\AAA\Models\User;
 use dnj\ErrorTracker\Contracts\IAppManager;
 use dnj\UserLogger\Contracts\ILogger;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -57,7 +58,7 @@ class ProductManager implements IProductManager
         return DB::transaction(function () use ($title, $deviceHandler, $hardwares, $firmwares, $stateHistoryLimits, $owner, $userActivityLog) {
             $firmwares = array_map([Firmware::class, 'ensureId'], $firmwares);
             $hardwares = array_map([Hardware::class, 'ensureId'], $hardwares);
-            $owner = UserUtil::ensureId($owner);
+            $owner = User::ensureId($owner);
 
             $app = $this->appManager->store($title, $owner, null, false);
             /**
@@ -116,7 +117,7 @@ class ProductManager implements IProductManager
                 unset($changes['firmwares']);
             }
             if (isset($changes['owner'])) {
-                $changes['owner_id'] = UserUtil::ensureId($changes['owner']);
+                $changes['owner_id'] = User::ensureId($changes['owner']);
                 unset($changes['owner']);
             }
             $product->fill($changes);

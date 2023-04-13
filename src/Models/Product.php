@@ -16,7 +16,6 @@ use YektaSmart\IotServer\Contracts\IDeviceHandler;
 use YektaSmart\IotServer\Contracts\IFirmware;
 use YektaSmart\IotServer\Contracts\IProduct;
 use YektaSmart\IotServer\Database\Factories\ProductFactory;
-use YektaSmart\IotServer\UserUtil;
 
 /**
  * @property int                                     $id
@@ -88,7 +87,7 @@ class Product extends Model implements IProduct
             $query->whereRelation('firmwares', 'id', 'IN', array_map(fn ($h) => Firmware::ensureId($h), $filters['hardware']));
         }
         if (isset($filters['owner'])) {
-            $query->where($this->getOwnerUserColumn(), UserUtil::ensureId($filters['owner']));
+            $query->where($this->getOwnerUserColumn(), User::ensureId($filters['owner']));
         }
         if (isset($filters['userHasAccess'])) {
             $this->scopeUserHasAccess($query, $filters['userHasAccess']);

@@ -2,6 +2,7 @@
 
 namespace YektaSmart\IotServer;
 
+use dnj\AAA\Models\User;
 use dnj\Filesystem\Contracts\IFile;
 use dnj\UserLogger\Contracts\ILogger;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -64,7 +65,7 @@ class FirmwareManager implements IFirmwareManager
     ): Firmware {
         return DB::transaction(function () use ($name, $version, $file, $features, $hardwares, $owner, $serial, $userActivityLog) {
             $hardwares = array_map([Hardware::class, 'ensureId'], $hardwares);
-            $owner = UserUtil::ensureId($owner);
+            $owner = User::ensureId($owner);
 
             /**
              * @var Firmware|null
@@ -117,7 +118,7 @@ class FirmwareManager implements IFirmwareManager
                 unset($changes['hardwares']);
             }
             if (isset($changes['owner'])) {
-                $changes['owner_id'] = UserUtil::ensureId($changes['owner']);
+                $changes['owner_id'] = User::ensureId($changes['owner']);
                 unset($changes['owner']);
             }
             $firmware->fill($changes);

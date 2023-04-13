@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use YektaSmart\IotServer\Contracts\IFolder;
 use YektaSmart\IotServer\Database\Factories\FolderFactory;
-use YektaSmart\IotServer\UserUtil;
 
 /**
  * @property int                $id
@@ -104,7 +103,7 @@ class Folder extends Model implements IFolder
 
     public function canChangeOwnerTo(int|Authenticatable $other): bool
     {
-        return $this->owner_id === UserUtil::ensureId($other);
+        return $this->owner_id === User::ensureId($other);
     }
 
     public function canChangeParentTo(int|IFolder $other): bool

@@ -2,6 +2,7 @@
 
 namespace YektaSmart\IotServer;
 
+use dnj\AAA\Models\User;
 use dnj\UserLogger\Contracts\ILogger;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,8 +33,8 @@ class FolderManager implements IFolderManager
         bool $userActivityLog = false
     ): Folder {
         return DB::transaction(function () use ($title, $parent, $owner, $users, $userActivityLog) {
-            $owner = UserUtil::ensureId($owner);
-            $users = array_map([UserUtil::class, 'ensureId'], $users);
+            $owner = User::ensureId($owner);
+            $users = array_map([User::class, 'ensureId'], $users);
 
             if ($parent) {
                 if (is_int($parent)) {
@@ -91,7 +92,7 @@ class FolderManager implements IFolderManager
                     throw new \Exception();
                 }
 
-                $changes['owner_id'] = UserUtil::ensureId($changes['owner']);
+                $changes['owner_id'] = User::ensureId($changes['owner']);
                 unset($changes['owner']);
             }
             if (isset($changes['parent'])) {
@@ -104,7 +105,7 @@ class FolderManager implements IFolderManager
             }
 
             if (isset($changes['users'])) {
-                $users = array_map([UserUtil::class, 'ensureId'], $changes['users']);
+                $users = array_map([User::class, 'ensureId'], $changes['users']);
                 $folder->users()->sync($users);
                 unset($changes['users']);
             }
