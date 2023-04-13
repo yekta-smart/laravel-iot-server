@@ -2,20 +2,21 @@
 
 namespace YektaSmart\IotServer\Models;
 
+use dnj\AAA\HasOwner;
 use dnj\AAA\Models\User;
 use dnj\ErrorTracker\Laravel\Server\Models\App;
 use dnj\UserLogger\Concerns\Loggable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use YektaSmart\IotServer\Contracts\IDeviceHandler;
-use YektaSmart\IotServer\Contracts\IFrameware;
+use YektaSmart\IotServer\Contracts\IFirmware;
 use YektaSmart\IotServer\Contracts\IProduct;
 use YektaSmart\IotServer\Database\Factories\ProductFactory;
-use YektaSmart\IotServer\Models\Concerns\HasOwner;
-use YektaSmart\IotServer\Models\Concerns\HasSemVer;
+use YektaSmart\IotServer\UserUtil;
 
 /**
  * @property int                                     $id
@@ -30,12 +31,11 @@ use YektaSmart\IotServer\Models\Concerns\HasSemVer;
  * @property Carbon|null                             $updated_at
  * @property App                                     $error_tracker_app
  * @property Collection<Hardware>                    $hardwares
- * @property Collection<Frameware>                   $framewares
+ * @property Collection<Firmware>                    $firmwares
  */
 class Product extends Model implements IProduct
 {
     use HasFactory;
-    use HasSemVer;
     use HasOwner;
     use Loggable;
 
@@ -53,6 +53,7 @@ class Product extends Model implements IProduct
     protected $fillable = [
         'parent_id',
         'owner_id',
+        'device_handler',
         'title',
     ];
     protected $casts = [
@@ -65,9 +66,9 @@ class Product extends Model implements IProduct
         return $this->belongsToMany(Hardware::class, 'iot_server_hardwares_products');
     }
 
-    public function framewares(): BelongsToMany
+    public function firmwares(): BelongsToMany
     {
-        return $this->belongsToMany(Frameware::class, 'iot_server_products_framewares');
+        return $this->belongsToMany(Firmware::class, 'iot_server_products_firmwares');
     }
 
     public function error_tracker_app(): BelongsTo
@@ -75,9 +76,33 @@ class Product extends Model implements IProduct
         return $this->belongsTo(App::class);
     }
 
+    public function scopeFilter(Builder $query, array $filters): void
+    {
+        if (isset($filters['title'])) {
+            $query->where('title', 'LIKE', '%'.$filters['title'].'%');
+        }
+        if (isset($filters['hardware'])) {
+            $query->whereRelation('hardwares', 'id', 'IN', array_map(fn ($h) => Hardware::ensureId($h), $filters['hardware']));
+        }
+        if (isset($filters['firmware'])) {
+            $query->whereRelation('firmwares', 'id', 'IN', array_map(fn ($h) => Firmware::ensureId($h), $filters['hardware']));
+        }
+        if (isset($filters['owner'])) {
+            $query->where($this->getOwnerUserColumn(), UserUtil::ensureId($filters['owner']));
+        }
+        if (isset($filters['userHasAccess'])) {
+            $this->scopeUserHasAccess($query, $filters['userHasAccess']);
+        }
+    }
+
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function getSerial(): string
+    {
+        return $this->serial;
     }
 
     public function getTitle(): string
@@ -100,21 +125,21 @@ class Product extends Model implements IProduct
         return $this->hardwares->pluck('id')->all();
     }
 
-    public function getDefaultFeatureIds(int|IFrameware $frameware): ?array
+    public function getDefaultFeatureIds(int|IFirmware $firmware): ?array
     {
         if (null === $this->features) {
             return null;
         }
-        if ($frameware instanceof IFrameware) {
-            $frameware = $frameware->getId();
+        if ($firmware instanceof IFirmware) {
+            $firmware = $firmware->getId();
         }
 
-        return $this->features[$frameware] ?? null;
+        return $this->features[$firmware] ?? null;
     }
 
-    public function getFramewareIds(): array
+    public function getFirmwareIds(): array
     {
-        return $this->framewares->pluck('id')->all();
+        return $this->firmwares->pluck('id')->all();
     }
 
     public function getErrorTrackerAppId(): int

@@ -4,9 +4,11 @@ namespace YektaSmart\IotServer\Models;
 
 use Carbon\Carbon;
 use dnj\AAA\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use YektaSmart\IotServer\Contracts\IDevice;
 use YektaSmart\IotServer\Contracts\IDeviceConfig;
 use YektaSmart\IotServer\Database\Factories\DeviceConfigFactory;
 
@@ -23,6 +25,8 @@ use YektaSmart\IotServer\Database\Factories\DeviceConfigFactory;
 class DeviceConfig extends Model implements IDeviceConfig
 {
     use HasFactory;
+
+    public const UPDATED_AT = null;
 
     public static function newFactory(): DeviceConfigFactory
     {
@@ -51,6 +55,11 @@ class DeviceConfig extends Model implements IDeviceConfig
     public function device(): BelongsTo
     {
         return $this->belongsTo(Device::class);
+    }
+
+    public function scopeForDevice(Builder $builder, int|IDevice $device): void
+    {
+        $builder->where('device_id', self::ensureId($device));
     }
 
     public function getId(): int

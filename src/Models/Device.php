@@ -3,9 +3,11 @@
 namespace YektaSmart\IotServer\Models;
 
 use Carbon\Carbon;
+use dnj\AAA\HasOwner;
 use dnj\AAA\Models\User;
 use dnj\ErrorTracker\Laravel\Server\Models\Device as ErrorTrackerDevice;
 use dnj\UserLogger\Concerns\Loggable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use YektaSmart\IotServer\Contracts\IDevice;
 use YektaSmart\IotServer\Contracts\IDeviceHandler;
 use YektaSmart\IotServer\Database\Factories\DeviceFactory;
-use YektaSmart\IotServer\Models\Concerns\HasOwner;
+use YektaSmart\IotServer\UserUtil;
 
 /**
  * @property int                                                                                            $id
@@ -26,8 +28,8 @@ use YektaSmart\IotServer\Models\Concerns\HasOwner;
  * @property Product                                                                                        $product
  * @property int                                                                                            $hardware_id
  * @property Hardware                                                                                       $hardware
- * @property int                                                                                            $frameware_id
- * @property Frameware                                                                                      $frameware
+ * @property int                                                                                            $firmware_id
+ * @property Firmware                                                                                       $firmware
  * @property array{config:array{count:int|null,age:int|null},state:array{count:int|null,age:int|null}}|null $history_limits
  * @property array{enabledIds:int[],disabledIds:int[]}|null                                                 $features
  * @property int                                                                                            $error_tracker_device_id
@@ -56,10 +58,11 @@ class Device extends Model implements IDevice
     protected $table = 'iot_server_devices';
     protected $fillable = [
         'owner_id',
+        'serial',
         'title',
         'product_id',
         'hardware_id',
-        'frameware_id',
+        'firmware_id',
         'features',
         'error_tracker_device_id',
     ];
@@ -74,9 +77,9 @@ class Device extends Model implements IDevice
         return $this->belongsTo(Hardware::class);
     }
 
-    public function frameware(): BelongsTo
+    public function firmware(): BelongsTo
     {
-        return $this->belongsTo(Frameware::class);
+        return $this->belongsTo(Firmware::class);
     }
 
     public function users(): BelongsToMany
@@ -99,9 +102,36 @@ class Device extends Model implements IDevice
         return $this->hasMany(DeviceState::class);
     }
 
+    public function scopeFilter(Builder $query, array $filters): void
+    {
+        if (isset($filters['title'])) {
+            $query->where('title', 'LIKE', '%'.$filters['title'].'%');
+        }
+        if (isset($filters['product'])) {
+            $query->where('product_id', Product::ensureId($filters['product']));
+        }
+        if (isset($filters['hardware'])) {
+            $query->where('hardware_id', Hardware::ensureId($filters['hardware']));
+        }
+        if (isset($filters['firmware'])) {
+            $query->where('firmware_id', Firmware::ensureId($filters['firmware']));
+        }
+        if (isset($filters['owner'])) {
+            $query->where($this->getOwnerUserColumn(), UserUtil::ensureId($filters['owner']));
+        }
+        if (isset($filters['userHasAccess'])) {
+            $this->scopeUserHasAccess($query, $filters['userHasAccess']);
+        }
+    }
+
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function getSerial(): string
+    {
+        return $this->serial;
     }
 
     public function getTitle(): string
@@ -139,14 +169,14 @@ class Device extends Model implements IDevice
         return $this->hardware;
     }
 
-    public function getFramewareId(): int
+    public function getFirmwareId(): int
     {
-        return $this->frameware_id;
+        return $this->firmware_id;
     }
 
-    public function getFrameware(): Frameware
+    public function getFirmware(): Firmware
     {
-        return $this->frameware;
+        return $this->firmware;
     }
 
     public function getFeaturesCustomization(): ?array

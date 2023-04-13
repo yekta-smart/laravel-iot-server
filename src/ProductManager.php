@@ -2,6 +2,7 @@
 
 namespace YektaSmart\IotServer;
 
+use dnj\ErrorTracker\Contracts\IAppManager;
 use dnj\UserLogger\Contracts\ILogger;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Collection;
@@ -10,13 +11,26 @@ use Illuminate\Support\Str;
 use YektaSmart\IotServer\Contracts\IDeviceHandler;
 use YektaSmart\IotServer\Contracts\IProduct;
 use YektaSmart\IotServer\Contracts\IProductManager;
-use YektaSmart\IotServer\Models\Frameware;
+use YektaSmart\IotServer\Models\Firmware;
+use YektaSmart\IotServer\Models\Hardware;
 use YektaSmart\IotServer\Models\Product;
 
 class ProductManager implements IProductManager
 {
-    public function __construct(protected ILogger $userLogger)
+    public function __construct(
+        protected ILogger $userLogger,
+        protected IAppManager $appManager,
+    ) {
+    }
+
+    public function find(int $id): ?Product
     {
+        return Product::query()->find($id);
+    }
+
+    public function findOrFail(int $id): Product
+    {
+        return Product::query()->findOrFail($id);
     }
 
     /**
@@ -32,7 +46,7 @@ class ProductManager implements IProductManager
         string $deviceHandler,
         int|Authenticatable $owner,
         array $hardwares = [],
-        array $framewares = [],
+        array $firmwares = [],
         ?array $stateHistoryLimits = null,
         bool $userActivityLog = false,
     ): Product {
@@ -40,22 +54,25 @@ class ProductManager implements IProductManager
             throw new \TypeError('device_handler must implemented '.IDeviceHandler::class);
         }
 
-        return DB::transaction(function () use ($title, $deviceHandler, $hardwares, $framewares, $stateHistoryLimits, $owner, $userActivityLog) {
-            $framewares = array_map([Frameware::class, 'ensureId'], $framewares);
+        return DB::transaction(function () use ($title, $deviceHandler, $hardwares, $firmwares, $stateHistoryLimits, $owner, $userActivityLog) {
+            $firmwares = array_map([Firmware::class, 'ensureId'], $firmwares);
             $hardwares = array_map([Hardware::class, 'ensureId'], $hardwares);
             $owner = UserUtil::ensureId($owner);
 
+            $app = $this->appManager->store($title, $owner, null, false);
             /**
              * @var Product
              */
-            $product = Product::query()->create([
+            $product = Product::query()->newModelInstance([
                 'title' => $title,
                 'device_handler' => $deviceHandler,
                 'owner_id' => $owner,
                 'state_history_limits' => $stateHistoryLimits,
             ]);
+            $product->error_tracker_app_id = $app;
+            $product->save();
             $product->hardwares()->sync($hardwares);
-            $product->framewares()->sync($framewares);
+            $product->firmwares()->sync($firmwares);
 
             if ($userActivityLog) {
                 $this->userLogger->on($product)
@@ -69,7 +86,7 @@ class ProductManager implements IProductManager
     }
 
     /**
-     * @param array{title?:string,deviceHandler?:class-string<IDeviceHandler>,hardwares?:array<int|IHardware>,framewares:array<array{id:IFrameware|int,defaultFeatures:int[]}|IFrameware|int>,stateHistoryLimits:array{count:int|null,age:int|null}|null,owner?:int|Authenticatable} $changes
+     * @param array{title?:string,deviceHandler?:class-string<IDeviceHandler>,hardwares?:array<int|IHardware>,firmwares:array<array{id:IFirmware|int,defaultFeatures:int[]}|IFirmware|int>,stateHistoryLimits:array{count:int|null,age:int|null}|null,owner?:int|Authenticatable} $changes
      */
     public function update(int|IProduct $product, array $changes, bool $userActivityLog = false): Product
     {
@@ -89,14 +106,14 @@ class ProductManager implements IProductManager
             }
 
             if (isset($changes['hardwares'])) {
-                $hardwares = array_map([Frameware::class, 'ensureId'], $changes['hardwares']);
+                $hardwares = array_map([Firmware::class, 'ensureId'], $changes['hardwares']);
                 $product->hardwares()->sync($hardwares);
                 unset($changes['hardwares']);
             }
-            if (isset($changes['framewares'])) {
-                $framewares = array_map([Frameware::class, 'ensureId'], $changes['framewares']);
-                $product->framewares()->sync($framewares);
-                unset($changes['framewares']);
+            if (isset($changes['firmwares'])) {
+                $firmwares = array_map([Firmware::class, 'ensureId'], $changes['firmwares']);
+                $product->firmwares()->sync($firmwares);
+                unset($changes['firmwares']);
             }
             if (isset($changes['owner'])) {
                 $changes['owner_id'] = UserUtil::ensureId($changes['owner']);
@@ -111,23 +128,25 @@ class ProductManager implements IProductManager
                     ->withProperties($changes)
                     ->log('updated');
             }
+
+            return $product;
         });
     }
 
-    public function destroy(int|IProduct $hardware, bool $userActivityLog = false): void
+    public function destroy(int|IProduct $product, bool $userActivityLog = false): void
     {
-        DB::transaction(function ($hardware, $userActivityLog) {
+        DB::transaction(function () use ($product, $userActivityLog) {
             /**
              * @var Product
              */
-            $hardware = Product::query()
+            $product = Product::query()
                 ->lockForUpdate()
-                ->findOrFail(Product::ensureId($hardware));
-            $hardware->delete();
+                ->findOrFail(Product::ensureId($product));
+            $product->delete();
             if ($userActivityLog) {
-                $this->userLogger->on($hardware)
+                $this->userLogger->on($product)
                     ->withRequest(request())
-                    ->withProperties($hardware->toArray())
+                    ->withProperties($product->toArray())
                     ->log('destroyed');
             }
         });
