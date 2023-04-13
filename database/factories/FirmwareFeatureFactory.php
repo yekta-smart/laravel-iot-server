@@ -3,29 +3,35 @@
 namespace YektaSmart\IotServer\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use YektaSmart\IotServer\Models\Frameware;
-use YektaSmart\IotServer\Models\FramewareFeature;
+use YektaSmart\IotServer\Models\Firmware;
+use YektaSmart\IotServer\Models\FirmwareFeature;
 
 /**
- * @extends Factory<FramewareFeature>
+ * @extends Factory<FirmwareFeature>
  */
-class FramewareFeatureFactory extends Factory
+class FirmwareFeatureFactory extends Factory
 {
-    protected $model = FramewareFeature::class;
+    protected $model = FirmwareFeature::class;
 
     public function definition()
     {
+        static $code;
+        if (!$code) {
+            $code = 0;
+        }
+        ++$code;
+
         return [
-            'frameware_id' => Frameware::factory(),
-            'name' => fake()->word(),
-            'code' => fake()->numberBetween(),
+            'firmware_id' => Firmware::factory(),
+            'name' => 'feature_'.$code,
+            'code' => $code,
         ];
     }
 
-    public function withFrameware(Frameware|int $frameware): static
+    public function withFirmware(Firmware|int $firmware): static
     {
         return $this->state(fn () => [
-            'frameware' => $frameware,
+            'firmware_id' => $firmware,
         ]);
     }
 

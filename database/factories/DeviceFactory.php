@@ -6,11 +6,11 @@ use dnj\AAA\Contracts\IUser;
 use dnj\AAA\Models\User;
 use dnj\ErrorTracker\Laravel\Server\Models\Device as ErrorTrackerDevice;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use YektaSmart\IotServer\Contracts\IFrameware;
+use YektaSmart\IotServer\Contracts\IFirmware;
 use YektaSmart\IotServer\Contracts\IHardware;
 use YektaSmart\IotServer\Contracts\IProduct;
 use YektaSmart\IotServer\Models\Device;
-use YektaSmart\IotServer\Models\Frameware;
+use YektaSmart\IotServer\Models\Firmware;
 use YektaSmart\IotServer\Models\Hardware;
 use YektaSmart\IotServer\Models\Product;
 
@@ -25,10 +25,11 @@ class DeviceFactory extends Factory
     {
         return [
             'owner_id' => User::factory(),
-            'title' => fake()->word(),
+            'serial' => str_replace('-', '', fake()->uuid()),
+            'title' => fake()->words(3, true),
             'product_id' => Product::factory(),
             'hardware_id' => Hardware::factory(),
-            'frameware_id' => Frameware::factory(),
+            'firmware_id' => Firmware::factory(),
             'history_limits' => null,
             'features' => null,
             'error_tracker_device_id' => ErrorTrackerDevice::factory(),
@@ -63,10 +64,10 @@ class DeviceFactory extends Factory
         ]);
     }
 
-    public function withFrameware(int|IFrameware $frameware): static
+    public function withFirmware(int|IFirmware $firmware): static
     {
         return $this->state(fn () => [
-            'frameware_id' => $frameware,
+            'firmware_id' => $firmware,
         ]);
     }
 

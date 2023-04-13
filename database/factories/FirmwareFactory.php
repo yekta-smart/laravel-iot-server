@@ -7,21 +7,23 @@ use dnj\AAA\Models\User;
 use dnj\Filesystem\Contracts\IFile;
 use dnj\Filesystem\Tmp\File;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use YektaSmart\IotServer\Models\Frameware;
+use YektaSmart\IotServer\Models\Firmware;
 
 /**
- * @extends Factory<Frameware>
+ * @extends Factory<Firmware>
  */
-class FramewareFactory extends Factory
+class FirmwareFactory extends Factory
 {
-    protected $model = Frameware::class;
+    protected $model = Firmware::class;
 
     public function definition()
     {
         return [
             'owner_id' => User::factory(),
+            'serial' => str_replace('-', '', fake()->uuid()),
             'name' => fake()->domainName(),
             'file' => new File(),
+            'version' => fake()->semver(false, false),
         ];
     }
 

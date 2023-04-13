@@ -23,8 +23,7 @@ class ProductFactory extends Factory
             'title' => fake()->word(),
             'device_handler' => '',
             'state_history_limits' => null,
-            'error_tracker_app' => App::factory(),
-            'features' => null,
+            'error_tracker_app_id' => App::factory(),
         ];
     }
 

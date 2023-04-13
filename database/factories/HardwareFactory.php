@@ -18,8 +18,9 @@ class HardwareFactory extends Factory
     {
         return [
             'owner_id' => User::factory(),
+            'serial' => str_replace('-', '', fake()->uuid()),
             'name' => fake()->domainName(),
-            'version' => 1,
+            'version' => fake()->semver(false, false),
         ];
     }
 
