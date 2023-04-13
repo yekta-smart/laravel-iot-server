@@ -3,7 +3,7 @@
 	"require": {
 		"php": "^8.1",
 		"dnj/filesystem": "^1.0.1",
-		"dnj/laravel-error-tracker-server": "^1.0.0",
+		"dnj/laravel-error-tracker-server": "^1.0.1",
 		"dnj/laravel-user-logger": "^1.0.0"
 	},
 	"require-dev": {
