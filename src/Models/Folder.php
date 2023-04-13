@@ -2,6 +2,7 @@
 
 namespace YektaSmart\IotServer\Models;
 
+use dnj\AAA\HasOwner;
 use dnj\AAA\Models\User;
 use dnj\UserLogger\Concerns\Loggable;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -13,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use YektaSmart\IotServer\Contracts\IFolder;
 use YektaSmart\IotServer\Database\Factories\FolderFactory;
-use YektaSmart\IotServer\Models\Concerns\HasOwner;
 use YektaSmart\IotServer\UserUtil;
 
 /**
@@ -140,5 +140,10 @@ class Folder extends Model implements IFolder
         }
 
         return null === $o;
+    }
+
+    public function getOwnerUserId(): int
+    {
+        return $this->owner_id;
     }
 }
