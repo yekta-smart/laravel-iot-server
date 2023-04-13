@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use YektaSmart\IotServer\Contracts\IDevice;
 use YektaSmart\IotServer\Contracts\IDeviceConfig;
 use YektaSmart\IotServer\Contracts\IDeviceConfigManager;
+use YektaSmart\IotServer\Models\Device;
 use YektaSmart\IotServer\Models\DeviceConfig;
 
 class DeviceConfigManager implements IDeviceConfigManager
@@ -23,6 +24,14 @@ class DeviceConfigManager implements IDeviceConfigManager
     public function search(int|IDevice $device, array $filters): Collection
     {
         return DeviceConfig::query()->forDevice($device)->filter($filters)->get();
+    }
+
+    public function getLatest(int|IDevice $device): ?DeviceConfig
+    {
+        return DeviceConfig::query()
+            ->forDevice($device)
+            ->orderBy('id', 'desc')
+            ->first();
     }
 
     public function store(
@@ -42,7 +51,7 @@ class DeviceConfigManager implements IDeviceConfigManager
              * @var DeviceConfig
              */
             $config = DeviceConfig::query()->create([
-                'device_id' => $device,
+                'device_id' => Device::ensureId($device),
                 'created_at' => $createdAt ?? now(),
                 'data' => $data,
                 'configurator_id' => $configuratorId,
