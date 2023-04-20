@@ -19,12 +19,20 @@ class ProductFactory extends Factory
     public function definition()
     {
         return [
+            'serial' => str_replace('-', '', fake()->uuid()),
             'owner_id' => User::factory(),
             'title' => fake()->word(),
             'device_handler' => '',
             'state_history_limits' => null,
             'error_tracker_app_id' => App::factory(),
         ];
+    }
+
+    public function withSerial(string $serial): static
+    {
+        return $this->state(fn () => [
+            'serial' => $serial,
+        ]);
     }
 
     public function withOwner(int|IUser $owner): static

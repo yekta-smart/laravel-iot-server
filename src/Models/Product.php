@@ -19,6 +19,7 @@ use YektaSmart\IotServer\Database\Factories\ProductFactory;
 
 /**
  * @property int                                     $id
+ * @property string                                  $serial
  * @property int                                     $owner_id
  * @property User                                    $owner
  * @property string                                  $title
@@ -52,6 +53,7 @@ class Product extends Model implements IProduct
     protected $fillable = [
         'parent_id',
         'owner_id',
+        'serial',
         'device_handler',
         'title',
     ];
@@ -77,6 +79,9 @@ class Product extends Model implements IProduct
 
     public function scopeFilter(Builder $query, array $filters): void
     {
+        if (isset($filters['serial'])) {
+            $query->where('serial', $filters['serial']);
+        }
         if (isset($filters['title'])) {
             $query->where('title', 'LIKE', '%'.$filters['title'].'%');
         }

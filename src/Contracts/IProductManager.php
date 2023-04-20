@@ -10,8 +10,12 @@ interface IProductManager
 
     public function findOrFail(int $id): IProduct;
 
+    public function findBySerial(string $serial): ?IProduct;
+
+    public function findBySerialOrFail(string $serial): IProduct;
+
     /**
-     * @param array{title?:string,hardware?:int[],firmware?:int[],owner?:int[]|null,userHasAccess?:int} $filters
+     * @param array{title?:string,serial?:string,hardware?:int[],firmware?:int[],owner?:int[]|null,userHasAccess?:int} $filters
      *
      * @return iterable<IProduct>
      */
@@ -30,11 +34,12 @@ interface IProductManager
         array $hardwares = [],
         array $firmwares = [],
         ?array $stateHistoryLimits = null,
+        ?string $serial = null,
         bool $userActivityLog = false,
     ): IProduct;
 
     /**
-     * @param array{title?:string,deviceHandler?:class-string<IDeviceHandler>,hardwares?:array<int|IHardware>,firmwares:array<array{id:IFirmware|int,defaultFeatures:int[]}|IFirmware|int>,stateHistoryLimits:array{count:int|null,age:int|null}|null,owner?:int|Authenticatable} $changes
+     * @param array{serial?:string,title?:string,deviceHandler?:class-string<IDeviceHandler>,hardwares?:array<int|IHardware>,firmwares:array<array{id:IFirmware|int,defaultFeatures:int[]}|IFirmware|int>,stateHistoryLimits:array{count:int|null,age:int|null}|null,owner?:int|Authenticatable} $changes
      */
     public function update(int|IProduct $product, array $changes, bool $userActivityLog = false): IProduct;
 

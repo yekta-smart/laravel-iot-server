@@ -33,7 +33,7 @@ class ProductController extends Controller
 
     public function store(ProductStoreRequest $request)
     {
-        $product = $this->manager->store($request->title, $request->deviceHandler, $request->owner, [], [], null, true);
+        $product = $this->manager->store($request->title, $request->deviceHandler, $request->owner, [], [], null, $request->serial, true);
 
         return ProductResource::make($product);
     }

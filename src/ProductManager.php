@@ -34,6 +34,16 @@ class ProductManager implements IProductManager
         return Product::query()->findOrFail($id);
     }
 
+    public function findBySerial(string $serial): ?Product
+    {
+        return Product::query()->where('serial', $serial)->first();
+    }
+
+    public function findBySerialOrFail(string $serial): Product
+    {
+        return Product::query()->where('serial', $serial)->firstOrFail();
+    }
+
     /**
      * @return Collection<Product>
      */
@@ -49,13 +59,14 @@ class ProductManager implements IProductManager
         array $hardwares = [],
         array $firmwares = [],
         ?array $stateHistoryLimits = null,
+        ?string $serial = null,
         bool $userActivityLog = false,
     ): Product {
         if (!is_subclass_of($deviceHandler, IDeviceHandler::class, true)) {
             throw new \TypeError('device_handler must implemented '.IDeviceHandler::class);
         }
 
-        return DB::transaction(function () use ($title, $deviceHandler, $hardwares, $firmwares, $stateHistoryLimits, $owner, $userActivityLog) {
+        return DB::transaction(function () use ($title, $deviceHandler, $hardwares, $firmwares, $stateHistoryLimits, $owner, $userActivityLog, $serial) {
             $firmwares = array_map([Firmware::class, 'ensureId'], $firmwares);
             $hardwares = array_map([Hardware::class, 'ensureId'], $hardwares);
             $owner = User::ensureId($owner);
@@ -69,6 +80,7 @@ class ProductManager implements IProductManager
                 'device_handler' => $deviceHandler,
                 'owner_id' => $owner,
                 'state_history_limits' => $stateHistoryLimits,
+                'serial' => $serial ?? str_replace('-', '', Str::uuid()),
             ]);
             $product->error_tracker_app_id = $app;
             $product->save();
@@ -87,7 +99,7 @@ class ProductManager implements IProductManager
     }
 
     /**
-     * @param array{title?:string,deviceHandler?:class-string<IDeviceHandler>,hardwares?:array<int|IHardware>,firmwares:array<array{id:IFirmware|int,defaultFeatures:int[]}|IFirmware|int>,stateHistoryLimits:array{count:int|null,age:int|null}|null,owner?:int|Authenticatable} $changes
+     * @param array{serial?:string,title?:string,deviceHandler?:class-string<IDeviceHandler>,hardwares?:array<int|IHardware>,firmwares:array<array{id:IFirmware|int,defaultFeatures:int[]}|IFirmware|int>,stateHistoryLimits:array{count:int|null,age:int|null}|null,owner?:int|Authenticatable} $changes
      */
     public function update(int|IProduct $product, array $changes, bool $userActivityLog = false): Product
     {

@@ -81,14 +81,19 @@ class ProductControllerTest extends TestCase
     {
         $me = $this->createUserWithModelAbility(IProduct::class, 'create');
         $this->actingAs($me);
+        $serial = '1234567890123456789A123456789B12';
         $response = $this->postJson('iot-server/products', [
             'title' => 'Remote On/Off Switch',
             'deviceHandler' => DummyDeviceHandler::class,
             'owner' => $me->getId(),
+            'serial' => $serial,
         ])->assertCreated();
         $this->assertIsArray($response['data']);
         $this->assertIsInt($response['data']['id']);
-        $this->assertDatabaseHas(Product::class, ['id' => $response['data']['id']]);
+        $this->assertDatabaseHas(Product::class, [
+            'id' => $response['data']['id'],
+            'serial' => $serial,
+        ]);
     }
 
     public function testShowNotAuthenticated(): void
@@ -138,12 +143,17 @@ class ProductControllerTest extends TestCase
         $product = Product::factory()->withOwner($me)->create();
 
         $this->actingAs($me);
+        $serial = '1234567890123456789A123456789B13';
         $response = $this->putJson('iot-server/products/'.$product->getId(), [
             'title' => 'Remote OnOff Switch',
+            'serial' => $serial,
         ])->assertOk();
         $this->assertIsArray($response['data']);
         $this->assertIsInt($response['data']['id']);
-        $this->assertDatabaseHas(Product::class, ['id' => $response['data']['id']]);
+        $this->assertDatabaseHas(Product::class, [
+            'id' => $response['data']['id'],
+            'serial' => $serial,
+        ]);
     }
 
     public function testDestroyNotAuthenticated(): void

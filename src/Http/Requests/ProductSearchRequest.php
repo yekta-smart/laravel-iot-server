@@ -20,6 +20,7 @@ class ProductSearchRequest extends FormRequest
         $user = $this->user();
 
         return [
+            'serial' => ['required', 'sometimes', 'string'],
             'title' => ['required', 'sometimes', 'string'],
             'owner' => ['required', 'sometimes', app(UserExists::class)->userHasAccess($user)],
             'firmware' => ['required', 'sometimes', 'array'],

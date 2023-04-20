@@ -12,6 +12,10 @@ return new class() extends Migration {
         Schema::create('iot_server_products', function (Blueprint $table) {
             $table->id();
 
+            $table->string('serial', 32)
+                ->collation('latin1_general_ci')
+                ->unique();
+
             $table->foreignId('owner_id')
                 ->constrained((new User())->getTable(), 'id');
 

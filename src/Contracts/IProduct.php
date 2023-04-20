@@ -8,6 +8,8 @@ interface IProduct extends IOwnerableModel
 {
     public function getId(): int;
 
+    public function getSerial(): string;
+
     public function getTitle(): string;
 
     /**

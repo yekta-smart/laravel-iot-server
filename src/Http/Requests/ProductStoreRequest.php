@@ -7,11 +7,13 @@ use Illuminate\Foundation\Http\FormRequest;
 use YektaSmart\IotServer\Contracts\IDeviceHandler;
 use YektaSmart\IotServer\Contracts\IProduct;
 use YektaSmart\IotServer\Rules\ProductDeviceHandler;
+use YektaSmart\IotServer\Rules\ProductSerialBeUnique;
 
 /**
  * @property string                       $title
  * @property class-string<IDeviceHandler> $deviceHandler
  * @property int|null                     $owner
+ * @property string                       $serial
  */
 class ProductStoreRequest extends FormRequest
 {
@@ -28,6 +30,7 @@ class ProductStoreRequest extends FormRequest
             'title' => ['required', 'string'],
             'deviceHandler' => ['required', 'string', new ProductDeviceHandler()],
             'owner' => ['required', 'int', app(UserExists::class)->userHasAccess($user)],
+            'serial' => ['required', 'sometimes', 'ascii', 'size:32', app(ProductSerialBeUnique::class)],
         ];
     }
 }
