@@ -65,7 +65,7 @@ class DeviceManager implements IDeviceManager
         int|IProduct $product,
         int|IHardware $hardware,
         int|IFirmware $firmware,
-        int|Authenticatable $owner,
+        int|Authenticatable $owner = null,
         array $users = [],
         ?array $historyLimits = null,
         ?array $features = null,
@@ -87,7 +87,7 @@ class DeviceManager implements IDeviceManager
                 'firmware_id' => Firmware::ensureId($firmware),
                 'history_limits' => $historyLimits,
                 'features' => $features,
-                'owner_id' => User::ensureId($owner),
+                'owner_id' => $owner ? User::ensureId($owner) : null,
             ]);
             $device->error_tracker_device_id = $errorTrackerDevice->getId();
             $device->save();
@@ -116,8 +116,11 @@ class DeviceManager implements IDeviceManager
             $device = Device::query()
                 ->lockForUpdate()
                 ->findOrFail(Device::ensureId($device));
-
-            foreach (['product', 'hardware', 'firmware', 'owner'] as $key) {
+            if (array_key_exists('owner', $changes)) {
+                $changes['owner_id'] = User::ensureId($changes['owner']);
+                unset($changes['owner']);
+            }
+            foreach (['product', 'hardware', 'firmware'] as $key) {
                 if (isset($changes[$key])) {
                     if (is_object($changes[$key])) {
                         if (method_exists($changes[$key], 'getId')) {

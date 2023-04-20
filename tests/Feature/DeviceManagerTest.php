@@ -55,6 +55,36 @@ class DeviceManagerTest extends TestCase
         $this->assertSame($owner->getId(), $device->getOwnerUserId());
     }
 
+    public function testStoreWithoutOwner(): void
+    {
+        $product = Product::factory()->create();
+        $hardware = Hardware::factory()->create();
+        $firmware = Firmware::factory()->create();
+        $serial = Str::uuid()->__toString();
+        $device = $this->getDeviceManager()->store(
+            'test',
+            $product,
+            $hardware,
+            $firmware,
+            null,
+            [],
+            null,
+            null,
+            $serial,
+            true
+        );
+        $this->assertSame('test', $device->getTitle());
+        $this->assertSame($product->getId(), $device->getProductId());
+        $this->assertSame($hardware->getId(), $device->getHardwareId());
+        $this->assertSame($firmware->getId(), $device->getFirmwareId());
+        $this->assertEmpty($device->getUserIds());
+        $this->assertNull($device->getHistoryLimits());
+        $this->assertNull($device->getFeaturesCustomization());
+        $this->assertSame($serial, $device->getSerial());
+        $this->assertNotNull($device->getErrorTrackerDeviceId());
+        $this->assertNull($device->getOwnerUserId());
+    }
+
     public function testUpdate(): void
     {
         $device = Device::factory()->create();

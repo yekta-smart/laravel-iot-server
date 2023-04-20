@@ -15,7 +15,7 @@ interface IDeviceManager
     public function findBySerialOrFail(string $serial): IDevice;
 
     /**
-     * @param array{title?:string,product?:int|IProduct,hardware?:int|IHardware,firmware?:int|IFirmware,owner?:int,userHasAccess?:int} $filters
+     * @param array{title?:string,product?:int|IProduct,hardware?:int|IHardware,firmware?:int|IFirmware,owner?:int|null,userHasAccess?:int} $filters
      *
      * @return iterable<IDevice>
      */
@@ -31,7 +31,7 @@ interface IDeviceManager
         int|IProduct $product,
         int|IHardware $hardware,
         int|IFirmware $firmware,
-        int|Authenticatable $owner,
+        int|Authenticatable|null $owner = null,
         array $users = [],
         ?array $historyLimits = null,
         ?array $features = null,
@@ -42,7 +42,7 @@ interface IDeviceManager
     /**
      * Only owner can update their's device.
      *
-     * @param array{serial?:string,title?:string,product?:int|IProduct,hardware?:int|IHardware,firmware?:int|IFirmware,owner?:int|Authenticatable,historyLimits?:array{config?:array{count:int|null,age:int|null},state?:array{count:int|null,age:int|null}}|null,users?:int[],features?:array{enabledIds?:int[],disabledIds?:int[]}|null,users?:array<int|Authenticatable>} $changes
+     * @param array{serial?:string,title?:string,product?:int|IProduct,hardware?:int|IHardware,firmware?:int|IFirmware,owner?:int|Authenticatable|null,historyLimits?:array{config?:array{count:int|null,age:int|null},state?:array{count:int|null,age:int|null}}|null,users?:int[],features?:array{enabledIds?:int[],disabledIds?:int[]}|null,users?:array<int|Authenticatable>} $changes
      */
     public function update(
         int|IDevice $device,
