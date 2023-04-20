@@ -95,7 +95,7 @@ class DeviceManager implements IDeviceManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($device)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($device->toArray())
                     ->log('created');
             }
@@ -149,7 +149,7 @@ class DeviceManager implements IDeviceManager
             $device->save();
             if ($userActivityLog) {
                 $this->userLogger->on($device)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($changes)
                     ->log('updated');
             }
@@ -173,7 +173,7 @@ class DeviceManager implements IDeviceManager
             $device->delete();
             if ($userActivityLog) {
                 $this->userLogger->on($device)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($device->toArray())
                     ->log('destroyed');
             }

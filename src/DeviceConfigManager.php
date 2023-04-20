@@ -60,7 +60,7 @@ class DeviceConfigManager implements IDeviceConfigManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($config)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($config->toArray())
                     ->log('created');
             }
@@ -79,9 +79,9 @@ class DeviceConfigManager implements IDeviceConfigManager
                 ->lockForUpdate()
                 ->findOrFail(DeviceConfig::ensureId($config));
             $config->delete();
-            if ($userActivityLog) {
+            if ($userActivityLog and app()->has('request')) {
                 $this->userLogger->on($config)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($config->toArray())
                     ->log('destroyed');
             }

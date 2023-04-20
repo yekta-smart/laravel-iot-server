@@ -67,7 +67,7 @@ class FirmwareFeatureManager implements IFirmwareFeatureManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($feature)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($feature->toArray())
                     ->log('created');
             }
@@ -93,7 +93,7 @@ class FirmwareFeatureManager implements IFirmwareFeatureManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($feature)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->log('trashed');
             }
 
@@ -118,7 +118,7 @@ class FirmwareFeatureManager implements IFirmwareFeatureManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($feature)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->log('trashed');
             }
 
@@ -139,7 +139,7 @@ class FirmwareFeatureManager implements IFirmwareFeatureManager
             $feature->forceDelete();
             if ($userActivityLog) {
                 $this->userLogger->on($feature)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($feature->toArray())
                     ->log('destroyed');
             }

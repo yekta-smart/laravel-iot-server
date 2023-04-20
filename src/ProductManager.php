@@ -89,7 +89,7 @@ class ProductManager implements IProductManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($product)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($product->toArray())
                     ->log('created');
             }
@@ -137,7 +137,7 @@ class ProductManager implements IProductManager
             $product->save();
             if ($userActivityLog) {
                 $this->userLogger->on($product)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($changes)
                     ->log('updated');
             }
@@ -158,7 +158,7 @@ class ProductManager implements IProductManager
             $product->delete();
             if ($userActivityLog) {
                 $this->userLogger->on($product)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($product->toArray())
                     ->log('destroyed');
             }

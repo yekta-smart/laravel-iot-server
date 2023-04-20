@@ -76,7 +76,7 @@ class HardwareManager implements IHardwareManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($hardware)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($hardware->toArray())
                     ->log('created');
             }
@@ -113,7 +113,7 @@ class HardwareManager implements IHardwareManager
             $hardware->save();
             if ($userActivityLog) {
                 $this->userLogger->on($hardware)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($changes)
                     ->log('updated');
             }
@@ -134,7 +134,7 @@ class HardwareManager implements IHardwareManager
             $hardware->delete();
             if ($userActivityLog) {
                 $this->userLogger->on($hardware)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($hardware->toArray())
                     ->log('destroyed');
             }

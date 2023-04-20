@@ -60,7 +60,7 @@ class FolderManager implements IFolderManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($folder)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($folder->toArray())
                     ->log('created');
             }
@@ -115,7 +115,7 @@ class FolderManager implements IFolderManager
             $folder->save();
             if ($userActivityLog) {
                 $this->userLogger->on($folder)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($changes)
                     ->log('updated');
             }
@@ -134,7 +134,7 @@ class FolderManager implements IFolderManager
             $folder->delete();
             if ($userActivityLog) {
                 $this->userLogger->on($folder)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($folder->toArray())
                     ->log('destroyed');
             }

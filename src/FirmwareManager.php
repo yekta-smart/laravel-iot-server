@@ -93,7 +93,7 @@ class FirmwareManager implements IFirmwareManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($firmware)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($firmware->toArray())
                     ->log('created');
             }
@@ -126,7 +126,7 @@ class FirmwareManager implements IFirmwareManager
             $firmware->save();
             if ($userActivityLog) {
                 $this->userLogger->on($firmware)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($changes)
                     ->log('updated');
             }
@@ -147,7 +147,7 @@ class FirmwareManager implements IFirmwareManager
             $firmware->delete();
             if ($userActivityLog) {
                 $this->userLogger->on($firmware)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($firmware->toArray())
                     ->log('destroyed');
             }

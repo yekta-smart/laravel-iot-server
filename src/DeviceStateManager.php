@@ -51,7 +51,7 @@ class DeviceStateManager implements IDeviceStateManager
 
             if ($userActivityLog) {
                 $this->userLogger->on($state)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($state->toArray())
                     ->log('created');
             }
@@ -72,7 +72,7 @@ class DeviceStateManager implements IDeviceStateManager
             $state->delete();
             if ($userActivityLog) {
                 $this->userLogger->on($state)
-                    ->withRequest(request())
+                    ->withRequest(app()->has('request') ? request() : null)
                     ->withProperties($state->toArray())
                     ->log('destroyed');
             }
