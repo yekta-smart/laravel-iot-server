@@ -12,7 +12,7 @@ return new class() extends Migration {
             $table->id();
 
             $table->string('serial', 32)
-                ->collation('latin1_general_ci')
+                ->collation('latin1_general_cs')
                 ->unique();
 
             $table->foreignId('owner_id')
@@ -23,7 +23,7 @@ return new class() extends Migration {
                 ->unique();
 
             $table->string('file', 255)
-                ->collation('latin1_general_ci');
+                ->collation('latin1_general_cs');
 
             $table->unsignedInteger('version');
 

@@ -16,7 +16,7 @@ return new class() extends Migration {
             $table->id();
 
             $table->string('serial', 32)
-                ->collation('latin1_general_ci')
+                ->collation('latin1_general_cs')
                 ->unique();
 
             $table->string('title');
