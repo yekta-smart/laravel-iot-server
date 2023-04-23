@@ -2,6 +2,7 @@
 
 namespace YektaSmart\IotServer;
 
+use YektaSmart\IotServer\Contracts\IClientPeer;
 use YektaSmart\IotServer\Contracts\IDevice;
 use YektaSmart\IotServer\Contracts\IDevicePeer;
 use YektaSmart\IotServer\Contracts\IPeer;
@@ -77,6 +78,49 @@ class PeerRegistery implements IPeerRegistery
         return null !== $this->firstDevice($device);
     }
 
+    public function firstClient(int|IDevice $device): ?ClientPeer
+    {
+        $device = Device::ensureId($device);
+        foreach ($this->peers as $peer) {
+            if ($peer instanceof IClientPeer and $peer->getDeviceId() == $device) {
+                return $peer;
+            }
+        }
+
+        return null;
+    }
+
+    public function firstClientOrFail(int|IDevice $device): ClientPeer
+    {
+        $p = $this->firstClient($device);
+        if (null === $p) {
+            throw new \Exception('notfound');
+        }
+
+        return $p;
+    }
+
+    /**
+     * @return IClientPeer[]
+     */
+    public function getClients(int|IDevice $device): array
+    {
+        $peers = [];
+        $device = Device::ensureId($device);
+        foreach ($this->peers as $peer) {
+            if ($peer instanceof IClientPeer and $peer->getDeviceId() == $device) {
+                $peers[] = $peer;
+            }
+        }
+
+        return $peers;
+    }
+
+    public function hasClient(int|IDevice $device): bool
+    {
+        return null !== $this->firstClient($device);
+    }
+
     public function has(IPeer|string $peer): bool
     {
         if ($peer instanceof IPeer) {
@@ -111,5 +155,13 @@ class PeerRegistery implements IPeerRegistery
         unset($this->peers[$peer]);
 
         return true;
+    }
+
+    /**
+     * @return iterable<IPeer>
+     */
+    public function all(): iterable
+    {
+        return $this->peers;
     }
 }

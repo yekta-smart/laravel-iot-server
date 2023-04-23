@@ -19,6 +19,17 @@ interface IPeerRegistery
 
     public function hasDevice(int|IDevice $device): bool;
 
+    public function firstClient(int|IDevice $device): ?IClientPeer;
+
+    public function firstClientOrFail(int|IDevice $device): IClientPeer;
+
+    /**
+     * @return IClientPeer[]
+     */
+    public function getClients(int|IDevice $device): array;
+
+    public function hasClient(int|IDevice $device): bool;
+
     public function has(IPeer|string $peer): bool;
 
     public function remove(IPeer|string $peer): bool;
@@ -26,4 +37,9 @@ interface IPeerRegistery
     public function find(string $id): ?IPeer;
 
     public function findOrFail(string $id): IPeer;
+
+    /**
+     * @return iterable<IPeer>
+     */
+    public function all(): iterable;
 }
