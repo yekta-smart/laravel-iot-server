@@ -23,7 +23,7 @@ class DeviceOwnRequest extends FormRequest
         $user = $this->user();
 
         return [
-            'serial' => ['required',  'string', 'ascii', 'size:32'],
+            'serial' => ['required',  'string', 'ascii', 'max:32'],
             'title' => ['required', 'sometimes', 'string'],
             'owner' => ['required', 'sometimes', 'int', app(UserExists::class)->userHasAccess($user)],
         ];
